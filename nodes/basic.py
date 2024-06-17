@@ -9,7 +9,7 @@ class Signature_Ye:
     @classmethod
     def INPUT_TYPES(s):
         return {
-            "required": {"text": ("STRING",{"forceInput": True})}
+            "required": {"model": ("STRING",{"forceInput": True}),"author": ("STRING",{"forceInput": True}),"copyright": ("STRING",{"forceInput": True})}
         }
     RETURN_TYPES = ("STRING",)
     FUNCTION = "my_get"
@@ -17,12 +17,12 @@ class Signature_Ye:
 
     CATEGORY = "Ye"
 
-    def my_get(self, text):
+    def my_get(self, model,author,copyright):
         # 获取当前时间
         current_time = datetime.now()
         # 格式化当前时间（可选）
         formatted_time = current_time.strftime("%Y-%m-%d %H:%M")
-        signature_text = f"MODEL:{text} | TIME:{formatted_time} | AUTHOR:thinkthinking | Powered By <CuteYou2>@Rui"
+        signature_text = f"MODEL:{model} | TIME:{formatted_time} | AUTHOR:{author} | Powered By {copyright}"
         return {"result": (signature_text,),}
 
     """
