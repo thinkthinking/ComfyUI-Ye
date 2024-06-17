@@ -45,11 +45,10 @@ class CheckpointLoader_Ye:
     CATEGORY = "Ye"
 
     def load_checkpoint(self, ckpt_name):
-        print("ssssssssssssssssssssssssssssssssssssss")
         print(ckpt_name)
         ckpt_path = folder_paths.get_full_path("checkpoints", ckpt_name)
         out = comfy.sd.load_checkpoint_guess_config(ckpt_path, output_vae=True, output_clip=True, embedding_directory=folder_paths.get_folder_paths("embeddings"))
-        result = list(out)+[ckpt_name]
+        result = list(out[:3])+[ckpt_name]
         return result
 
 
