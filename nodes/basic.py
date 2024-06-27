@@ -1,6 +1,16 @@
 import folder_paths
 from datetime import datetime
 import comfy.sd
+import random
+
+from ollama import Client
+from PIL import Image
+import numpy as np
+import base64
+from io import BytesIO
+import json
+import re
+
 class Signature_Ye:
 
     def __init__(self):
@@ -72,3 +82,78 @@ class PrintHelloWorld_Ye:
         print(f"Tutorial Text : {text}")
         
         return {}
+
+prompt_template = {
+  "description": "",
+  "long_prompt": "",
+  "camera_angle_word": "",
+  "style_words": "",
+  "subject_words": "",
+  "light_words": "",
+  "environment_words": ""
+}
+
+
+class OllamaVision:
+    def __init__(self):
+        pass
+    
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+                "query": ("STRING", {
+                    "multiline": True,
+                    "default": "describe the image"
+                }),
+                "debug": (["enable", "disable"],),
+                "url": ("STRING", {
+                    "multiline": False,
+                    "default": "http://127.0.0.1:11434"
+                }),
+                "model": (["llava-llama3:latest", "llava-phi3:latest", "llava:latest"],),
+                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "keep_alive": (["0", "60m"],),
+                
+            },
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("description",)
+    FUNCTION = "ollama_vision"
+    CATEGORY = "Ollama"
+
+    def ollama_vision(self, images, query,seed, debug, url, keep_alive, model):
+        images_b64 = []
+
+        for (batch_number, image) in enumerate(images):
+            i = 255. * image.cpu().numpy()
+            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+            buffered = BytesIO()
+            img.save(buffered, format="PNG")
+            img_bytes = base64.b64encode(buffered.getvalue())
+            images_b64.append(str(img_bytes, 'utf-8'))
+
+        client = Client(host=url)
+        options = {
+            "seed": seed,
+        }
+
+        if debug == "enable":
+            print(f"""[Ollama Vision] 
+request query params:
+
+- query: {query}
+- url: {url}
+- model: {model}
+- options: {options}
+- keep_alive: {keep_alive}
+
+""")
+
+        response = client.generate(model=model, prompt=query, keep_alive=keep_alive, options=options, images=images_b64)
+
+
+
+        return (response['response'],)
